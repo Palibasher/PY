@@ -15,3 +15,4 @@ for i in sob:
 
 print(shit)
 
+# http://codeforces.com/problemset/problem/155/A
