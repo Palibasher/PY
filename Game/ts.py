@@ -1,28 +1,37 @@
 from classes_g import Chest
+from classes_g import Player
 from random import randint
-weapons = {"Руки": [8, 0, "Руки как руки, тумаков надавать можно"],
-           "Тупой кинжал": [12, 55, "Тупой, но колоться пойдет"],
-           "Дубинка шипами": [13, 50, "Увесистая такая дубинка из крепкого дерева, тумаков надавать в самый раз"],
-           "Короткий меч": [14, 31, "Немного ржавый меч, но все же меч"],
-           "Топор дровосека": [14, 30, "Можно рубить деревья, а можно конечности врагов, ну и тумаков надавать"],
-           "Булава": [15, 25, "Серьезное оружие. Можно надавать очень серьезных тумаков"],
-           "Длинный меч": [16, 19, "Длинный острый меч, шутки кончились"],
-           "Боевой топор": [17, 9, "Топор внушительных размеров, таким можно зарубить быка"],
-           "Секира короля гоблинов": [18, 4, "Опасное и редкое оружие, когда-то король гоблинов 'Бабиус Третий', зарубил им собаку"]
-           }
+if __name__ == "__main__":
+    player = Player("Гарри", 10, 10)
+    chest = Chest(player)
+    chest.opening_chest()
+    chest.take_items()
+    player.show_chr()
+    player.get_devparam()
+    chest = Chest(player)
+    chest.opening_chest()
+    chest.take_items()
+    player.show_chr()
+    player.get_devparam()
+# print(weapons.keys())
+# print(*weapons.keys())
+# print([*weapons.keys()])
 
-chest = Chest()
-chest.opening_chest()
-print(chest.content)
-chest = Chest()
-chest.opening_chest()
-print(chest.content)
-chest = Chest()
-chest.opening_chest()
-print(chest.content)
-chest = Chest()
-chest.opening_chest()
-print(chest.content)
+# for i in chest.content.keys():
+#     print(f"{i} в кол-ве {chest.content[i]}")
+#     check_chest = int(input("Хотите узнать подробнее, что это за предмет?\n1. Да\n2. Нет\n"))
+#     if check_chest == 1:
+#         if i in weapons:
+#             print(weapons[i][2])
+#         elif i in armors:
+#             print(armors[i][2])
+#         elif i in amulets:
+#             print(amulets[i][2])
+#         elif i == "Зелья":
+#             print("Волшебное зелье, перед употреблением встряхнуть.")
+#         else:
+#             print("Волшебный свиток, который запускает во врага элекричеким зарядом. Лучше любых тумаков.")
+
 
 # for i in chest.content.keys():
 #     print(i[0])
