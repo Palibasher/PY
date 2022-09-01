@@ -50,31 +50,41 @@ class Enemy:
         self.defence = armour[1] #защита брони
         self.agi = agi #ловкость
         self.weapon = weapon
-        self.weapon_pt = weapon_pt #урон оружия
-        self.dmg_coefficient = 1 + (self.str / 50)
-        self.dmg = self.weapon_pt * self.dmg_coefficient #урон
-        self.output_dmg = round(self.dmg * randint(40,120)/100)
-
-    def get_devparam(self):
-        print(f"Класс: {self.class_name}, Имя : {self.name}, сила : {self.str}, броня: {self.base_armour} {self.defence}, оружие - {self.weapon}, урон оружия - {self.weapon_pt}, коэф - {self.dmg_coefficient}, итоговый урон = {self.output_dmg}")
+        self.weapon_pt = self.weapon[1] #урон оружия
+        self.weapon_description = self.weapon[2]
+        # self.dmg = self.weapon_pt * self.dmg_coefficient #урон
+        # self.output_dmg = round(self.dmg * randint(40,120)/100)
+    def dmg_coefficient(self):
+        return 1 + (self.str / 50)
+    def output_dmg(self):
+        return self.weapon_pt * self.dmg_coefficient()
     def new_hit(self):
-        self.output_dmg = round(self.dmg * randint(40, 120) / 100)
+        return round(self.output_dmg() * randint(40,120)/100)
+    def get_devparam(self):
+        print(f"Класс: {self.class_name}, Имя : {self.name}, сила : {self.str}, броня: {self.base_armour} {self.defence}, оружие - {self.weapon}, урон оружия - {self.weapon_pt}, коэф - {self.dmg_coefficient()}, итоговый урон = {self.new_hit()}\n"
+              f"Описание оружия: {self.weapon_description}")
+
 
 
 class Spicked_frog(Enemy):
     """Класс лягушки"""
     def __init__(self):
-        super().__init__(name = "Огромная лягушка", class_name="Лягуха", str = 10, base_hp =50, agi = 30, armour = ["Шкура", 5], weapon = ["Лапы", 10])
+        super().__init__(name = "Огромная лягушка", class_name="Лягуха", str = 10, base_hp =50, agi = 30, armour = ["Шкура", 5], weapon = ["Лапы", 5, "Лягушачьи лапки: вкусно, но лягушка так просто их не отдаст"])
 
 class Goblin(Enemy):
     """Класс гоблинс"""
     def __init__(self, name):
-        goblin_weapons = {"Лапы": [5, "Гоблинские лапы с огромными острыми ногтями."]}
-        a = randint(0, 0)
-        super().__init__(name, class_name="Гоблин", str = 10, base_hp =50, agi = 30, armour = ["Шкура", 5], weapon = [*goblin_weapons.keys()][a], weapon_pt=goblin_weapons[[*goblin_weapons.keys()][a]][0])
-
-
-
+        weapons_list = {"Лапы": [5, "Гоблинские лапы с огромными острыми ногтями."],
+                        "Камни": [6, "Негодяй собрался бросаться камнями."],
+                        "Тупой кинжал": [7, "Ржавый и тупой кинжал."],
+                        "Дубинка": [8, "Гоблин играет в бейсбол? Скорее всего нет..."],
+                        "Дубинка с шипами": [9, "Выглядит опасно и это точно не для бейсбола."],
+                        "Топор мясника": [10, "Средних размеров топор для разделки мяса."],
+                        "Плетка": [5, "Что этот гоблин задумал?."],
+                        "Копье": [5, "Копье слишком велико для гоблина, вряд ли сможет нанести им много урона."],
+                        "Нож": [8, "Хочешь знать, почему я использую нож? Пушки слишком быстры, не успеваешь насладиться, получить истинное удовольствие, а когда я использую нож,\nв этот самый последний момент раскрывается ВСЯ человеческая сущность, и в каком-то смысле я знаю твоих друзей лучше, чем ты."],}
+        a = randint(0, 8)
+        super().__init__(name, class_name="Гоблин", str = 10, base_hp =50, agi = -5, armour = ["Стеганная броня", 7], weapon = [[*weapons_list.keys()][a], weapons_list[[*weapons_list.keys()][a]][0], weapons_list[[*weapons_list.keys()][a]][1]])
 
 
 class Player:
@@ -115,8 +125,6 @@ class Player:
         return self.output_dmg() * 2
     def defence(self):
         return self.armor_pt + self.armour_bonus()
-
-
 
 
     def get_name(self):
@@ -182,46 +190,6 @@ class Player:
             print("Вы осорожно обошли подозрительный флакон и пошли дальше")
             pass
 
-
-weapons = {"Руки": [5, 0, "Руки как руки, тумаков надавать можно."],
-           "Тупой кинжал": [7, 60, "Тупой и ржавый кинжал, но им можно больно колоться. А рукояткой можно надавать тумаков"],
-           "Дубинка c шипами": [8, 50, "Увесистая такая дубинка из крепкого дерева, годится, что бы раздавать тумаки."],
-           "Короткий меч": [9, 38, "Немного ржавый меч, но все же меч."],
-           "Топор дровосека": [10, 30, "Можно рубить деревья, а можно конечности врагов. Опасное оружие."],
-           "Булава": [11, 25, "Серьезное оружие. Можно надавать очень серьезных тумаков."],
-           "Длинный меч": [12, 19, "Длинный острый меч, нешуточное оружие, можно и убить."],
-           "Боевой топор": [13, 9, "Топор внушительных размеров, таким можно зарубить быка."],
-           "Секира короля гоблинов": [18, 4, "Опасное и редкое оружие, когда-то король гоблинов 'Бабиус Третий', зарубил им собаку, а вообще мог бы и медведя."]
-           }
-armors = {"Рваная рубаха": [5, 0, "Ваша рубаха, достаточно плохая защита от тумаков."],
-          "Стеганная телогрейка": [8, 55, "Хорошая защита от холода, не особо хорошо помогает от тумаков."],
-          "Стеганный ватник": [10, 45, "Хорошая защита от логики и здравого смысла, так себе помогает от тумаков."],
-          "Кожанка": [15, 37, "Модная курточка из плотной кожи, кое-как помогает от тумаков."],
-          "Кольчуга": [20, 30, "Хорошая защита, в том числе и от тумаков."],
-          "Пластинчатая броня": [25, 25, "Тяжелая и прочная броня, от тумаков отлично защищает."],
-          "Кристаллический доспех": [30, 19, "Броня из сверхпрочного кристалла, тумаки только щекочут."],
-          "Броня из шкуры дракона": [35, 9, "Волшебная броня, тумаки не пройдут!."],
-          "Броня из шкуры Золотого дракона": [45, 4, "Легендарная броня из шкуры редчайшего дракона, почти полный иммунитет к тумакам."]
-          }
-amulets = {"Амулет Здоровья":[1, 15, "Увеличивает ваше здоровье", 30, 0, 0],
-           "Амулет Защиты":[1, 12, "Защишает от тумаков", 0, 0, 12],
-           "Амулет Берсерка":[1, 8, "Добавляет силы вам и вашим ударам, но отнимает здоровье", -20, 0.2, 0],
-           "Странный амулет":[1, 4, "Загадочный амулет", 10, 0.1, 5]}
-jokes = {"Пустой флакон из под зелья":[10, 65, "Кто то выпил, а грязный флакон бросил, вряд ли пригодится."],
-           "Обертку от конфеты":[10, 55, "Жаль саму конфету кто-то уже облагородил"],
-           "Банановая кожура":[5, 45, "Обычная кожура, высохла. Откуда она черт возьми в сундуке?"],
-           "Пуговица":[35, 35, "Бесполезный хлам!"],
-           "Записка от незнакомца":[25, 25, "Привет тебе друг! Я советую тебе поворачивать назад и идти домой, иначе получишь тумаков. С любовью, Пипкист!"],
-           "Записка от неизвестного":[15, 10, "Когда мне было 15 лет, и я ходил срать батя всё время как-бы невзначай крутился возле толчка,\n"
-                                             "и всё спрашивал, что ты там затих, почему тебя не слышно? первый раз я не ответил, так он начал ломиться в дверь,\n"
-                                             "и орать, что ты там молчишь, что с тобой? начал материться, и говорить, что вообще дверь с петель снимет,\n"
-                                             "алсо, батя ругался, если я сру и не смываю, причём не просто вконце срания, а непосредственно после \n"
-                                             "вылезания какашки, мотивировал это тем, что воняет, и сам потом мне говорил: вот я какну и смываю, и ты так делай! \n"
-                                             "однажды я срать сел, и слышу, батя где-то у двери встал в отдалении, ну я жопу вытер, и на пол накарачики присел,\n"
-                                             "а там щель очень широкая снизу у двери, ну я в щель и смотрю, а там батя на карачиках сидит и в щель смотрит, и мне говорит:\n"
-                                             "ты чё? ебанутый? чё ты там делаешь? батя кстати всё время какие-то травы пьёт, чтобы срать часто, срёт по 5 раз в день,\n"
-                                             "а потом говорит, что жопу жжёт, и ещё пердит он. пиздец короче! реальная история. я не тролль"]
-         }
 
 class Chest():
     """Класс сундук"""
@@ -353,7 +321,116 @@ class Chest():
 
 
 
+def fight_with_enemy(player, enemy):
+    player = player
+    enemy = enemy
+    player_hp = player.current_hp()
+    accumulative_dmg = 0
+    while enemy.base_hp > 0 and player_hp > 0:
+        print(f"Враг = {enemy.name}, здоровье врага - {enemy.base_hp}\n")
+        make_hit = int(input("Желаете ударить врага?\n 1 - Да. \n 2 - Нет.\n"))
+        if make_hit == 1:
+            what_hit = int(input("Как будем убивать?\n"
+                                 "1. Попытаться ударить по конечностям.\n"
+                                 "2. Попытаться нанести удар в туловище\n"
+                                 "3. Попытаться врезать по голове\n"))
+            if what_hit == 1:  #вариант слабый удар
+                check_for_luck = randint(1,100)
+                if check_for_luck >= 20 + enemy.agi:
+                    damage = player.light_hit()
+                    final_damage = round((damage - (damage * (enemy.defence / 100))) * (randint(50, 150)/100))
+                    if randint(1,5) == 4:
+                        final_damage = final_damage * 3
+                        enemy.base_hp -= final_damage
+                        print(f"Вы почувствовали прилив ярости и нанесли сокрушительный удар {enemy.name} на {final_damage} урона, у него осталось {enemy.base_hp} жизни")
+                        if enemy.base_hp <= 0:
+                            print(f"Вы убили {enemy.name}")
+                    else:
+                        enemy.base_hp -= final_damage
+                        print(f"Вы ударили {enemy.name} на {final_damage} урона, у него осталось {enemy.base_hp} жизни")
+                        if enemy.base_hp <= 0:
+                            print(f"Вы убили {enemy.name}")
+                if check_for_luck < 20 + enemy.agi:
+                    if randint(1,2) == 1:
+                        print(f"{enemy.name} смог заблокировать ваш удар!")
+                    else:
+                        print(f"{enemy.name} смог увернуться от вашего удара!")
+            if what_hit == 2: #вариант средний удар
+                check_for_luck = randint(1, 100)
+                if check_for_luck >= 50 + enemy.agi:
+                    damage = player.medium_hit()
+                    final_damage = round((damage - (damage * (enemy.defence / 100))) * (randint(50, 150) / 100))
+                    if randint(1,6) == 6:
+                        final_damage = final_damage * 3
+                        enemy.base_hp -= final_damage
+                        print(f"Вы почувствовали прилив ярости и нанесли сокрушительный удар {enemy.name} на {final_damage} урона, у него осталось {enemy.base_hp} жизни")
+                        if enemy.base_hp <= 0:
+                            print(f"Вы убили {enemy.name}")
+                            break
+                    else:
+                        enemy.base_hp -= final_damage
+                        print(f"Вы ударили {enemy.name} на {final_damage} урона, у него осталось {enemy.base_hp} жизни")
+                        if enemy.base_hp <= 0:
+                            print(f"Вы убили {enemy.name}")
+                            break
+                if check_for_luck < 50 + enemy.agi:
+                    if randint(1, 2) == 1:
+                        print(f"{enemy.name} смог заблокировать ваш удар!")
+                    else:
+                        print(f"{enemy.name} смог увернуться от вашего удара!")
+            if what_hit == 3: # сильный удар
+                check_for_luck = randint(1, 100)
+                if check_for_luck >= 25 + enemy.agi: # шанс попасть 25
+                    damage = player.mega_hit()
+                    final_damage = round((damage - (damage * (enemy.defence / 100))) * (randint(50, 150) / 100))
+                    if randint(1, 5) == 5: # проверка на крит
+                        final_damage = final_damage * 2
+                        if randint(1, 3) == 3: # мегакрит
+                            final_damage = final_damage * 2
+                            enemy.base_hp -= final_damage
+                            print(f"Вы почувствовали прилив ярости и нанесли сокрушительный удар {enemy.name} на {final_damage} урона, у него осталось {enemy.base_hp} жизни")
+                            if enemy.base_hp <= 0:
+                                print(f"Вы убили {enemy.name}")
+                                break
+                        else: # выполняем простой крит
+                            enemy.base_hp -= final_damage
+                            print(f"Вы нанесли мощный удар {enemy.name} на {final_damage} урона, у него осталось {enemy.base_hp} жизни")
+                            if enemy.base_hp <= 0:
+                                print(f"Вы убили {enemy.name}")
+                                break
+                        if enemy.base_hp <= 0:
+                            print(f"Вы убили {enemy.name}")
+                            break
+                    else: # выполняем сильный удар
+                        enemy.base_hp -= final_damage
+                        print(f"Вы ударили {enemy.name} на {final_damage} урона, у него осталось {enemy.base_hp} жизни")
+                        if enemy.base_hp <= 0:
+                            print(f"Вы убили {enemy.name}")
+                            break
+                if check_for_luck < 25 + enemy.agi:
+                    if randint(1, 2) == 1:
+                        print(f"{enemy.name} смог заблокировать ваш удар!")
+                    else:
+                        print(f"{enemy.name} смог увернуться от вашего удара!")
 
 
+        #     if enemy.base_hp > 0:
+        #         enemy_hit = enemy.new_hit()
+        #         player_hp -= enemy_hit
+        #         accumulative_dmg += enemy_hit #Важно!! Не запутаться с уроном после применения всех коэффициэнтов
+        #         print(f"{enemy.name} ударил вас, нанес {enemy_hit} урона, у вас осталось {player_hp}")
+        #         if player_hp < 0:
+        #             print("Похоже вы убиты")
+        #         pass
+        #     elif enemy.base_hp <= 0:
+        #         print(f"{enemy.name} убит!")
+        #         break
+        # else:
+        #     enemy_hit = enemy.new_hit()
+        #     player_hp -= enemy_hit
+        #     accumulative_dmg += enemy_hit
+        #     print(f"{enemy.name} ударил вас, нанес {enemy_hit} урона, у вас осталось {player_hp}")
+        #     if player_hp < 0:
+        #         print("Похоже вы убиты")
 
 
