@@ -1,6 +1,9 @@
 try:
-    some_list = list(map(int, input("Введите диджиты через пробел:\n").split())) #водим, разбиваем на список
-    def buble(array): #сортируем пузырьком
+    print("-----------------------------------------------------------------------------------------------\n"
+          "Программа находит позицию элемента в отсортированном списке, который меньше введенного пользователем числа, а следующий за ним больше или равен этому числу.\n"
+          "-----------------------------------------------------------------------------------------------\n")
+    some_list = list(map(int, input("Что бы создать список, введите диджиты через пробел:\n").split())) #водим, разбиваем на список
+    def buble(array): #Сортировка пузырьком
         for i in range(len(array)):
             for j in range(len(array) - i - 1):
                 if array[j] > array[j + 1]:
@@ -36,10 +39,21 @@ else:
                 return binary_search(copy_array, min(copy_array, key=lambda x: abs(x - element)),0, right=len(copy_array)) #взвращаем функцию, где ближайший по значению элемент будет меньше искомого
     num_index = find_closest(sor_list, digit, 0, len(sor_list))
     a = sor_list[num_index]
-
     k = 0
-    while sor_list[num_index + k] == a:
-       k += 1
-    print("Сдвиг по индекссам:", k )
-    print(f"Номер позиции элемента, который меньше введенного числа, а следующий за ним больше или равен этому числу : {num_index + k - 1}")
-    print(list(enumerate(sor_list)))
+    try:
+        while sor_list[num_index + k] == a:
+            k += 1
+        print(list(enumerate(sor_list)))
+        print("Сдвиг по индекссам:", k - 1)
+        print(f"---------------------\n"
+              f"Номер позиции элемента (c 0):  {num_index}\n")
+
+    except:
+        k = 0
+        print(list(enumerate(sor_list)))
+        print("Сдвиг по индекссам:", k - 1)
+        print(f"---------------------\n"
+              f"Номер позиции элемента (c 0):  {num_index}\n")
+
+
+
