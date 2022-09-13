@@ -7,9 +7,15 @@ from classes_g import Spicked_frog
 from classes_g import fight_with_enemy
 if __name__ == "__main__":
     i = 1
-    player = Player("Гарри", 10, 10, 10)
-    current_enemy = Goblin("Бобис")
+    player = Player("Гарри", 10, 10, 10, raw_hp=30)
+    chest = Chest(player)
+    chest.opening_chest()
+    chest.take_items()
+    player.show_chr()
+    player.get_devparam()
 
+    current_enemy = Goblin()
+    current_enemy.get_devparam()
     fight_with_enemy(player, current_enemy)
     # while i != 0:
     #     chest = Chest(player)
