@@ -1,13 +1,14 @@
 from random import randint
 
 class Tile():
-    def __init__(self, x, y, occupation = 0, state = 1, situation = 0, was_here = False):
+    def __init__(self, x, y, wall = 0, state = 1, situation = 0, was_here = False, digger_was_here = False):
         self.x = x
         self.y = y
         self.state = 1
         self.situation = situation
         self.was_here = was_here
-        self.situation = occupation
+        self.digger_was_here = digger_was_here
+        self.wall = wall
 
     def __str__(self):
         return f"[{self.state}]"
@@ -47,18 +48,18 @@ def make_path_in_out(lvlmap):
     def up_down_left_right(next_step):
         if randint(0, 1) == 0: #право лево либо верх низ
             if randint(0, 1) == 0: #право лево
-                next_step = go_right(next_step)
+                next_step = go_right(next_step) #право
             else:
-                next_step = go_left(next_step)
+                next_step = go_left(next_step) #право лево
         else:
             if randint(0, 1) == 0: #верх низ
                 next_step = go_down(next_step)
             else:
-                next_step = go_up(next_step)
+                next_step = go_up(next_step) #верх
         return next_step
     while next_step != end_point:
         if next_step in path:
-            print(next_step)
+            # rint(next_step)p
             next_step = (0, 0)
             path = []
         else:
@@ -121,6 +122,7 @@ def make_path_in_out(lvlmap):
                     next_step = go_up(next_step)
     path.append(next_step)
     return path
+
 
 
 

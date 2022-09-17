@@ -779,9 +779,280 @@ def player_move(player, lvlmap):
         matrix_print(lvlmap)
         player.make_move()
 
+def map_generator(lvlmap):
+    max_y, max_x = len(lvlmap) - 1, len(lvlmap[0]) - 1
+    digger = [0, 0]
+    path = []
+    def state_refresher(digger, lvlmap):  # генерируем путь диггером
+        for i, j in enumerate(lvlmap):
+            for z, l in enumerate(j):
+                if lvlmap[i][z] == digger:
+                    print(digger)
+                    lvlmap[i][z].wall = 1
+                    lvlmap[i][z].digger_was_here = True
+                    path.append(digger)
+                    if digger[0] == 0 and digger[1] == 0: #диггер в верхнем левом углу
+                        a = randint(0, 1)
+                        if a == 0 and lvlmap[i + 1][j].digger_was_here == False: #рандом + если не был справа, идем
+                            digger[0] += 1 #вправо
+                        elif a == 1 and lvlmap[i][j + 1].digger_was_here == False: #рандом + если не был снизу, идем
+                            digger[1] += 1 #вниз
+                        else: #придется вернуться
+                            a = randint(0, 1)
+                            if a == 1:
+                                digger[0] += 1
+                            else:
+                                digger[1] += 1
+                    elif digger[0] == 0 and digger[1] == max_y: #диггер в нижнем левом углу
+                        a = randint(0, 1)
+                        if a == 0 and lvlmap[i + 1][j].digger_was_here == False:  # рандом + если не был справа, идем
+                            digger[0] += 1  # вправо
+                        elif a == 1 and lvlmap[i][j - 1].digger_was_here == False:  # рандом + если не был вверху, идем
+                            digger[1] -= 1  # вверх
+                        else: #придется вернуться
+                            a = randint(0, 1)
+                            if a == 1:
+                                digger[0] += 1
+                            else:
+                                digger[1] -= 1
+                    elif digger[0] == max_x and digger[1] == 0: #диггер в верхнем правом углу
+                        a = randint(0, 1)
+                        if a == 0 and lvlmap[i - 1][j].digger_was_here == False:  # рандом + если не был слева, идем
+                            digger[0] -= 1  # влево
+                        elif a == 1 and lvlmap[i][j - 1].digger_was_here == False:  # рандом + если не был сверзу, идем
+                            digger[1] -= 1  # вверх
+                        else: #придется вернуться
+                            a = randint(0, 1)
+                            if a == 1:
+                                digger[0] -= 1
+                            else:
+                                digger[1] -= 1
+                    elif digger[0] == 0 and 0 > digger[1] > max_y: #диггер слева
+                        a = randint(0, 2)
+                        if a == 0 and lvlmap[i + 1][j].digger_was_here == False:
+                            digger[0] += 1  # вправо
+                        elif a == 1 and lvlmap[i][j - 1].digger_was_here == False:  # рандом + если не был сверху, идем
+                            digger[1] -= 1  # вверх
+                        elif a == 2 and lvlmap[i][j + 1].digger_was_here == False: #рандом + если не был снизу, идем
+                            digger[1] += 1 #вниз
+                        else:
+                            a = randint(0, 2)
+                            if a == 1:
+                                digger[0] += 1
+                            elif a == 2:
+                                digger[1] -= 1
+                            else:
+                                digger[1] += 1
+                    elif 0 > digger[0] > max_x and digger[1] == 0: #диггер сверху
+                        a = randint(0, 2)
+                        if a == 0 and lvlmap[i + 1][j].digger_was_here == False:
+                            digger[0] += 1  # вправо
+                        elif a == 1 and lvlmap[i][j + 1].digger_was_here == False:  # рандом + если не был сверху, идем
+                            digger[1] += 1  # вниз
+                        elif a == 2 and lvlmap[i - 1][j].digger_was_here == False: #рандом + если не был снизу, идем
+                            digger[0] -= 1 #влево
+                        else:
+                            a = randint(0, 2)
+                            if a == 1:
+                                digger[0] += 1
+                            elif a == 2:
+                                digger[1] += 1
+                            else:
+                                digger[0] -= 1
+                    elif 0 > digger[0] > max_x and digger[1] == max_y: #диггер снизу
+                        a = randint(0, 2)
+                        if a == 0 and lvlmap[i + 1][j].digger_was_here == False:
+                            digger[0] += 1  # вправо
+                        elif a == 1 and lvlmap[i][j - 1].digger_was_here == False:  # рандом + если не был сверху, идем
+                            digger[1] -= 1  # вверх
+                        elif a == 2 and lvlmap[i - 1][j].digger_was_here == False: #рандом + если не был снизу, идем
+                            digger[0] -= 1 #влево
+                        else:
+                            a = randint(0, 2)
+                            if a == 1:
+                                digger[0] += 1
+                            elif a == 2:
+                                digger[1] -= 1
+                            else:
+                                digger[0] -= 1
+                    elif digger[0] == max_x and 0 > digger[1] > max_y: #диггер справа
+                        a = randint(0, 2)
+                        if a == 0 and lvlmap[i - 1][j].digger_was_here == False:
+                            digger[0] -= 1  # влево
+                        elif a == 1 and lvlmap[i][j - 1].digger_was_here == False:  # рандом + если не был сверху, идем
+                            digger[1] -= 1  # вверх
+                        elif a == 2 and lvlmap[i][j + 1].digger_was_here == False: #рандом + если не был снизу, идем
+                            digger[1] += 1 #вниз
+                        else:
+                            a = randint(0, 2)
+                            if a == 1:
+                                digger[0] -= 1
+                            elif a == 2:
+                                digger[1] -= 1
+                            else:
+                                digger[1] += 1
+                    elif 0 > digger[0] > max_x and 0 > digger[1] > max_y: #диггер внутри
+                        a = randint(0, 3)
+                        if a == 0 and lvlmap[i - 1][j].digger_was_here == False:
+                            digger[0] -= 1  # влево
+                        elif a == 1 and lvlmap[i][j - 1].digger_was_here == False:  # рандом + если не был сверху, идем
+                            digger[1] -= 1  # вверх
+                        elif a == 2 and lvlmap[i][j + 1].digger_was_here == False:  # рандом + если не был снизу, идем
+                            digger[1] += 1  # вниз
+                        elif a == 3 and lvlmap[i + 1][j].digger_was_here == False:  # рандом + если не был снизу, идем
+                            digger[0] += 1  # вправо
+                        else:
+                            a = randint(0, 3)
+                            if a == 1:
+                                digger[0] -= 1
+                            elif a == 2:
+                                digger[1] -= 1
+                            elif a == 3:
+                                digger[0] += 1
+                            else:
+                                digger[1] += 1
+                    else:
+                        path.append(digger)
+    while digger != [max_x, max_y]:
+        state_refresher(digger, lvlmap)
+        return [lvlmap, path]
 
 
 
+def map_generator2(lvlmap):
+    max_y, max_x = len(lvlmap) - 1, len(lvlmap[0]) - 1
+    digger = [0, 0]
+    path = []
+    while digger != [max_x, max_y]:
 
-
-
+        print(path)
+        for i, j in enumerate(lvlmap):
+            for z, l in enumerate(j):
+                print(digger)
+                print(path)
+                if [i, z] == digger:
+                    lvlmap[i][z].wall = 1
+                    lvlmap[i][z].digger_was_here = True
+                    if digger[0] == 0 and digger[1] == 0: #диггер в верхнем левом углу РАБОТАЕТ
+                        a = randint(0, 1)
+                        if a == 0 and lvlmap[i + 1][z].digger_was_here == False: #рандом + если не был справа, идем
+                            digger[0] += 1 #вправо
+                        elif a == 1 and lvlmap[i][z + 1].digger_was_here == False: #рандом + если не был снизу, идем
+                            digger[1] += 1 #вниз
+                        else: #придется вернуться
+                            a = randint(0, 1)
+                            if a == 1:
+                                digger[0] += 1
+                            else:
+                                digger[1] += 1
+                    elif digger[0] == 0 and digger[1] == max_y: #диггер в нижнем левом углу
+                        a = randint(0, 1)
+                        if a == 0 and lvlmap[i + 1][z].digger_was_here == False:  # рандом + если не был справа, идем
+                            digger[0] += 1  # вправо
+                        elif a == 1 and lvlmap[i][z - 1].digger_was_here == False:  # рандом + если не был вверху, идем
+                            digger[1] -= 1  # вверх
+                        else: #придется вернуться
+                            a = randint(0, 1)
+                            if a == 1:
+                                digger[0] += 1
+                            else:
+                                digger[1] -= 1
+                    elif digger[0] == max_x and digger[1] == 0: #диггер в верхнем правом углу
+                        a = randint(0, 1)
+                        if a == 0 and lvlmap[i - 1][z].digger_was_here == False:  # рандом + если не был слева, идем
+                            digger[0] -= 1  # влево
+                        elif a == 1 and lvlmap[i][z + 1].digger_was_here == False:  # рандом + если не был сверзу, идем
+                            digger[1] += 1  # вниз
+                        else: #придется вернуться
+                            a = randint(0, 1)
+                            if a == 1:
+                                digger[0] += 1
+                            else:
+                                digger[1] += 1
+                    elif digger[0] == 0 and 0 < digger[1] < max_y: #диггер слева
+                        a = randint(0, 2)
+                        if a == 0 and lvlmap[i + 1][z].digger_was_here == False:
+                            digger[0] += 1  # вправо
+                        elif a == 1 and lvlmap[i][z - 1].digger_was_here == False:  # рандом + если не был сверху, идем
+                            digger[1] -= 1  # вверх
+                        elif a == 2 and lvlmap[i][z + 1].digger_was_here == False: #рандом + если не был снизу, идем
+                            digger[1] += 1 #вниз
+                        else:
+                            a = randint(0, 2)
+                            if a == 1:
+                                digger[0] += 1
+                            elif a == 2:
+                                digger[1] -= 1
+                            else:
+                                digger[1] += 1
+                    elif 0 < digger[0] < max_x and digger[1] == 0: #диггер сверху
+                        a = randint(0, 2)
+                        if a == 0 and lvlmap[i + 1][z].digger_was_here == False:
+                            digger[0] += 1  # вправо
+                        elif a == 1 and lvlmap[i][z + 1].digger_was_here == False:  # рандом + если не был сверху, идем
+                            digger[1] += 1  # вниз
+                        elif a == 2 and lvlmap[i - 1][z].digger_was_here == False: #рандом + если не был снизу, идем
+                            digger[0] -= 1 #влево
+                        else:
+                            a = randint(0, 2)
+                            if a == 1:
+                                digger[0] += 1
+                            elif a == 2:
+                                digger[1] += 1
+                            else:
+                                digger[0] -= 1
+                    elif 0 < digger[0] < max_x and digger[1] == max_y: #диггер снизу
+                        a = randint(0, 2)
+                        if a == 0 and lvlmap[i + 1][z].digger_was_here == False:
+                            digger[0] += 1  # вправо
+                        elif a == 1 and lvlmap[i][z - 1].digger_was_here == False:  # рандом + если не был сверху, идем
+                            digger[1] -= 1  # вверх
+                        elif a == 2 and lvlmap[i - 1][z].digger_was_here == False: #рандом + если не был снизу, идем
+                            digger[0] -= 1 #влево
+                        else:
+                            a = randint(0, 2)
+                            if a == 1:
+                                digger[0] += 1
+                            elif a == 2:
+                                digger[1] -= 1
+                            else:
+                                digger[0] -= 1
+                    elif digger[0] == max_x and 0 < digger[1] < max_y: #диггер справа
+                        a = randint(0, 2)
+                        if a == 0 and lvlmap[i - 1][z].digger_was_here == False:
+                            digger[0] -= 1  # влево
+                        elif a == 1 and lvlmap[i][z - 1].digger_was_here == False:  # рандом + если не был сверху, идем
+                            digger[1] -= 1  # вверх
+                        elif a == 2 and lvlmap[i][z + 1].digger_was_here == False: #рандом + если не был снизу, идем
+                            digger[1] += 1 #вниз
+                        else:
+                            a = randint(0, 2)
+                            if a == 1:
+                                digger[0] -= 1
+                            elif a == 2:
+                                digger[1] -= 1
+                            else:
+                                digger[1] += 1
+                    elif 0 < digger[0] < max_x and 0 < digger[1] < max_y: #диггер внутри
+                        a = randint(0, 3)
+                        if a == 0 and lvlmap[i - 1][z].digger_was_here == False:
+                            digger[0] -= 1  # влево
+                        elif a == 1 and lvlmap[i][z - 1].digger_was_here == False:  # рандом + если не был сверху, идем
+                            digger[1] -= 1  # вверх
+                        elif a == 2 and lvlmap[i][z + 1].digger_was_here == False:  # рандом + если не был снизу, идем
+                            digger[1] += 1  # вниз
+                        elif a == 3 and lvlmap[i + 1][z].digger_was_here == False:  # рандом + если не был снизу, идем
+                            digger[0] += 1  # вправо
+                        else:
+                            a = randint(0, 3)
+                            if a == 1:
+                                digger[0] -= 1
+                            elif a == 2:
+                                digger[1] -= 1
+                            elif a == 3:
+                                digger[0] += 1
+                            else:
+                                digger[1] += 1
+                    else:
+                        pass
+    return [lvlmap,path]
