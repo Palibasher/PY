@@ -1,4 +1,5 @@
 from random import randint
+from map import *
 weapons = {"Руки": [5, 0, "Руки как руки, тумаков надавать можно."],
            "Тупой кинжал": [7, 60, "Тупой и ржавый кинжал, но им можно больно колоться. А рукояткой можно надавать тумаков"],
            "Дубинка c шипами": [8, 50, "Увесистая такая дубинка из крепкого дерева, годится, что бы раздавать тумаки."],
@@ -108,7 +109,7 @@ class Goblin(Enemy):
 
 class Player:
     """Класс для Игрока"""
-    def __init__(self, name, raw_str, raw_int, raw_agi, amulet = ["Веревочка",[2, 0, 0, 0, 0, 0]], armor = ["Рваная рубаха", 2], weapon = ["Руки", 5], raw_hp = 100):
+    def __init__(self, name, raw_str, raw_int, raw_agi, amulet = ["Веревочка",[2, 0, 0, 0, 0, 0]], armor = ["Рваная рубаха", 2], weapon = ["Руки", 5], raw_hp = 100, pos_xx = 0, pos_yy = 0):
         """Задаем имя, пол, кол-во хп"""
         self.a = randint(0, 5) # кубик на будущее
         self.name = name #имя игрока
@@ -123,6 +124,10 @@ class Player:
         self.amulet = amulet[0] # какие амулеты надеты
         self.amulet_pt = [0, 0, 0, 0, 0, 0]
         self.raw_hp = raw_hp
+        self.pos_x = 0
+        self.pos_y = 0
+        self.pos_yy = pos_yy - 1
+        self.pos_xx = pos_xx - 1
     #Блок функций для пересчета ключевых характеристик
     def health_bonus(self):
         return self.amulet_pt[3]  # бонус от возможного амулета здоровья
@@ -144,7 +149,97 @@ class Player:
         return self.output_dmg() * 2
     def defence(self):
         return self.armor_pt + self.armour_bonus()
-
+    def make_move(self):
+        if self.pos_x == 0 and self.pos_y == 0: #верхний левый угол, начало
+            where_to_go = int(input("Куда двинуться?\n"
+                                    "1. Восток\n"
+                                    "2. Юг\n"))
+            if where_to_go == 1:
+                self.pos_x += 1
+            elif where_to_go == 2:
+                self.pos_y += 1
+        elif self.pos_x == self.pos_xx and self.pos_y == self.pos_yy: #нижний правый угол
+            where_to_go = int(input("Куда двинуться?\n"
+                                    "1. Север\n"
+                                    "2. Запад\n"))
+            if where_to_go == 1:
+                self.pos_y -= 1  # Север
+            elif where_to_go == 2:
+                self.pos_x -= 1  # Запад
+        elif self.pos_x == 0 and self.pos_y == self.pos_yy: #нижний левый угол
+            where_to_go = int(input("Куда двинуться?\n"
+                                    "1. Север\n"
+                                    "2. Восток\n"))
+            if where_to_go == 2:
+                self.pos_x += 1  # Восток
+            elif where_to_go == 1:
+                self.pos_y -= 1  # Север
+        elif self.pos_x == self.pos_xx and self.pos_y == 0: #верхний правый угол
+            where_to_go = int(input("Куда двинуться?\n"
+                                    "1. Юг\n"
+                                    "2. Запад\n"))
+            if where_to_go == 1:
+                self.pos_y += 1  # Юг
+            elif where_to_go == 2:
+                self.pos_x -= 1  # Запад
+        elif self.pos_x == 0: #левая сторона
+            where_to_go = int(input("Куда двинуться?\n"
+                                    "1. Восток\n"
+                                    "2. Юг\n"
+                                    "3. Север\n"))
+            if where_to_go == 1:
+                self.pos_x += 1
+            elif where_to_go == 2:
+                self.pos_y += 1
+            elif where_to_go == 3:
+                self.pos_y -= 1
+        elif self.pos_y == 0: #верхняя сторона
+            where_to_go = int(input("Куда двинуться?\n"
+                                    "1. Восток\n"
+                                    "2. Юг\n"
+                                    "3. Запад\n"))
+            if where_to_go == 1:
+                self.pos_x += 1  # Восток
+            elif where_to_go == 2:
+                self.pos_y += 1  # Юг
+            elif where_to_go == 3:
+                self.pos_x -= 1  # Запад
+        elif self.pos_x == self.pos_xx: #правая сторона
+            where_to_go = int(input("Куда двинуться?\n"
+                                    "1. Юг\n"
+                                    "2. Север\n"
+                                    "3. Запад\n"))
+            if where_to_go == 1:
+                self.pos_y += 1  # Юг
+            elif where_to_go == 2:
+                self.pos_y -= 1  # Север
+            elif where_to_go == 3:
+                self.pos_x -= 1  # Запад
+        elif self.pos_y == self.pos_yy: #нижняя сторона
+            where_to_go = int(input("Куда двинуться?\n"
+                                    "1. Восток\n"
+                                    "2. Север\n"
+                                    "3. Запад\n"))
+            if where_to_go == 1:
+                self.pos_x += 1  # Восток
+            elif where_to_go == 2:
+                self.pos_y -= 1  # Север
+            elif where_to_go == 3:
+                self.pos_x -= 1  # Запад
+        else: #не угол и не периметр
+            where_to_go = int(input("Куда двинуться?\n"
+                                    "1. Восток\n"
+                                    "2. Юг\n"
+                                    "3. Север\n"
+                                    "4. Запад\n"))
+            if where_to_go == 1:
+                self.pos_x += 1 #Восток
+            elif where_to_go == 2:
+                self.pos_y += 1 #Юг
+            elif where_to_go == 3:
+                self.pos_y -= 1 #Север
+            elif where_to_go == 4:
+                self.pos_x -= 1 #Запад
 
     def get_name(self):
         """Функция возвращает Имя"""
@@ -296,7 +391,7 @@ class Chest():
     def take_items(self):
         if  set([*weapons.keys()]) & set([*self.content.keys()]): #сравниваем содержимое сундука и список оружия
             current_weapon_in_chest = list(set([*weapons.keys()]) & set([*self.content.keys()])) #если есть совпадение, сохраняем переменную
-            print(f"Взять {set([*weapons.keys()]) & set([*self.content.keys()])} вместо своего текущего оружия? Сейчас у вас {self.player.weapon}.")
+            print(f"Взять {current_weapon_in_chest[0]} вместо своего текущего оружия? Сейчас у вас {self.player.weapon}.")
             k = int(input("1. Выглядит лучше моего..\n2. Нет, лучше оставлю свое.\n")) #выбираем поменять ли текущее
             if k == 1: #тут происходит перезаписывание текущего и его хар-ки
                 weapon_key = current_weapon_in_chest.pop()
@@ -307,7 +402,7 @@ class Chest():
                 pass
         if  set([*armors.keys()]) & set([*self.content.keys()]): #все то же для брони
             current_armor_in_chest = list(set([*armors.keys()]) & set([*self.content.keys()]))
-            print(f"Взять {set([*armors.keys()]) & set([*self.content.keys()])} вместо своей брони? Сейчас у вас {self.player.armor}.")
+            print(f"Взять {current_armor_in_chest[0]} вместо своей брони? Сейчас у вас {self.player.armor}.")
             k = int(input("1. Выглядит лучше моей..\n2. Нет, лучше оставлю свою.\n"))
             if k == 1:
                 armor_key = current_armor_in_chest.pop()
@@ -318,7 +413,7 @@ class Chest():
                 pass
         if  set([*amulets.keys()]) & set([*self.content.keys()]): #все то же для амулета
             current_amulet_in_chest = list(set([*amulets.keys()]) & set([*self.content.keys()]))
-            print(f"Надеть {set([*amulets.keys()]) & set([*self.content.keys()])} вместо текущего, сейчас у вас {self.player.amulet}.")
+            print(f"Надеть {current_amulet_in_chest[0]} вместо текущего, сейчас у вас {self.player.amulet}.")
             k = int(input("1. Надеть..\n2. Нет, лучше оставлю свой.\n"))
             if k == 1:
                 amulet_key = current_amulet_in_chest.pop()
@@ -338,7 +433,9 @@ class Chest():
             print(f"Зелья вы убрали в сумку, теперь у вас: зелья: - {self.player.inventar['Зелья']} шт.")
         else:
             pass
-
+    def open_and_take(self):
+        self.opening_chest()
+        self.take_items()
 
 
 def fight_with_enemy(player, enemy):
@@ -394,7 +491,7 @@ def fight_with_enemy(player, enemy):
                         print(f"Вы почувствовали прилив ярости и нанесли сокрушительный удар {enemy.name} на {final_damage} урона, у него осталось {enemy.base_hp} жизни")
                         if enemy.base_hp <= 0:
                             print(f"Вы убили {enemy.name}")
-                            return 1
+                            return player_hp
                         else:
                             player_hp = player_hp - inner_enemy_hit()
                             if inner_player_hp_checker() == 0:
@@ -532,7 +629,55 @@ def fight_with_enemy(player, enemy):
                         print(f"{enemy.name} корчится от боли, ошарашенно вращая глазами\n")
                         pass
             elif action == 2: #побег
-                pass
+                if enemy.mood == 3: #нельзя убежать от кровожадного
+                    player_hp -= 500
+                    print(
+                        "Вы попытались убежать, но повернувшись, почувствовали мощный удар в затылок, затем свет погас..")
+                    if inner_player_hp_checker() == 0:
+                        return 0
+                elif enemy.base_hp / player_hp > 3: #если у врага значительно больше здоровья
+                    if randint(1,2) == 1: #не овезло
+                        player_hp -= 500
+                        print("Вы попытались убежать, но повернувшись, почувствовали мощный удар в затылок, затем свет погас..")
+                        if inner_player_hp_checker() == 0:
+                            return 0
+                    else: #повезло
+                        if randint(1,2) == 1:
+                            print(f"Вы издали отвлекающий крик и резко бросились в сторону, до того как {enemy.name} опомнился")
+                            return player_hp
+                        else:
+                            player_hp = round(player_hp/2)
+                            print(f"Вы издали отвлекающий крик и резко бросились в сторону, до того как {enemy.name} опомнился,\n"
+                                  f"Но в спешке вы споткнулись и ударились головой, потеряв {player_hp} здоровья")
+                            return player_hp
+                elif 1 < enemy.base_hp / player_hp >= 3: #если у врага больше здоровья
+                    if randint(1, 3) == 1:  # не овезло
+                        player_hp -= 500
+                        print("Вы попытались убежать, но повернувшись, почувствовали мощный удар в затылок, затем свет погас..")
+                        if inner_player_hp_checker() == 0:
+                            return 0
+                    else:  # повезло
+                        if randint(1, 2) == 1:
+                            print(f"Вы издали отвлекающий крик и резко бросились в сторону, до того как {enemy.name} опомнился")
+                            return player_hp
+                        else:
+                            hit = round(player_hp * 0.25)
+                            player_hp = player_hp - hit
+                            print(f"Вы издали отвлекающий крик и резко бросились в сторону, до того как {enemy.name} опомнился,\n"
+                                f"Но в спешке вы споткнулись и ударились головой, потеряв {hit} здоровья")
+                            return player_hp
+                else: #если у врага меньше здоровья
+                    if randint(1, 100) > 31:
+                        print(
+                            f"Вы издали отвлекающий крик и резко бросились в сторону, до того как {enemy.name} опомнился")
+                        return player_hp
+                    else:
+                        hit = round(player_hp * 0.15)
+                        player_hp = player_hp - hit
+                        print(
+                            f"Вы издали отвлекающий крик и резко бросились в сторону, до того как {enemy.name} опомнился,\n"
+                            f"Но в спешке вы споткнулись и ударились головой, потеряв {hit} здоровья")
+                        return player_hp
             elif action == 3: #переговоры
                 action = int(input(f"Что сказать?\n"
                                    f"1. Извините, Вы не подскажете, как пройти в библиотеку?\n"
@@ -599,9 +744,9 @@ def fight_with_enemy(player, enemy):
                             if action == 2:
                                 pass
                 if action == 2: #мягкое предложение помириться
-                    pass
+                    print("Пока не готово")
                 if action == 3: #жесткое предложение помириться
-                    pass
+                    print("Пока не готово")
             elif action == 5: #взад
                 pass
             elif action == 4: #информация о враге
@@ -618,6 +763,25 @@ def fight_with_enemy(player, enemy):
                     print(enemy)
                 elif action == 4:
                     pass
+
+def player_move(player, lvlmap):
+    move_flag = 1
+    def state_refresher(player, lvlmap): #перерисовываем карту, где игрок там 2
+        for i, j in enumerate(lvlmap):
+            for z, l in enumerate(j):
+                if lvlmap[i][z] == lvlmap[player.pos_y][player.pos_x]:
+                    lvlmap[i][z].state = 2
+                    lvlmap[i][z].was_here = True
+                else:
+                    lvlmap[i][z].state = 1
+    while move_flag == 1:
+        state_refresher(player, lvlmap)
+        matrix_print(lvlmap)
+        player.make_move()
+
+
+
+
 
 
 
