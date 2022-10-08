@@ -1,24 +1,28 @@
 from random import randint
 
 class Tile():
-    def __init__(self, x, y, wall = 0, state = 1, situation = 0, was_here = False, digger_was_here = False):
+    def __init__(self, x, y, wall = "  ", state = 1, situation = 0, was_here = False, digger_was_here = False):
         self.x = x
         self.y = y
-        self.state = 1
+        self.state = state
         self.situation = situation
         self.was_here = was_here
         self.digger_was_here = digger_was_here
         self.wall = wall
 
     def __str__(self):
-        return f"[{self.state}]"
+        return f"{self.wall}"
 
 def matrix_print(matrix):
-    for i in matrix:
-        for j in i:
-            print(f"  {j}  ", end="")
+    for i, j in enumerate(matrix):
+        for z, l in enumerate(j):
+            print(matrix[i][z], end="")
         print()
-
+# def matrix_print_dig(matrix):
+#     for i, j in enumerate(matrix):
+#         for z, l in enumerate(j):
+#             print(matrix[i][z].digger_was_here, end="")
+#         print()
 
 def matrix_make_tiles(height, width, a = 0):
     lvlmap = [[a for i in range(width)] for j in range(height)]
@@ -59,7 +63,6 @@ def make_path_in_out(lvlmap):
         return next_step
     while next_step != end_point:
         if next_step in path:
-            # rint(next_step)p
             next_step = (0, 0)
             path = []
         else:
@@ -122,7 +125,6 @@ def make_path_in_out(lvlmap):
                     next_step = go_up(next_step)
     path.append(next_step)
     return path
-
 
 
 
