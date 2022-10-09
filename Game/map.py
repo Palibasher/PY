@@ -1,7 +1,8 @@
 from random import randint
 
+
 class Tile():
-    def __init__(self, x, y, wall = "  ", state = 1, situation = 0, was_here = False, digger_was_here = False):
+    def __init__(self, x, y, wall = "ˍ ˍ", state = 1, situation = None, was_here = False, digger_was_here = False):
         self.x = x
         self.y = y
         self.state = state
@@ -18,11 +19,6 @@ def matrix_print(matrix):
         for z, l in enumerate(j):
             print(matrix[i][z], end="")
         print()
-# def matrix_print_dig(matrix):
-#     for i, j in enumerate(matrix):
-#         for z, l in enumerate(j):
-#             print(matrix[i][z].digger_was_here, end="")
-#         print()
 
 def matrix_make_tiles(height, width, a = 0):
     lvlmap = [[a for i in range(width)] for j in range(height)]
@@ -32,99 +28,570 @@ def matrix_make_tiles(height, width, a = 0):
     return lvlmap
 
 
-def make_path_in_out(lvlmap):
-    max_y, max_x = len(lvlmap), len((lvlmap[0]))
-    next_step = (0, 0)
-    end_point = (max_x - 1, max_y - 1)
-    path = []
-    def go_up(next_step):
-        next_step = (next_step[0], next_step[1] - 1)  # верх
-        return next_step
-    def go_down(next_step):
-        next_step = (next_step[0], next_step[1] + 1)  # низ
-        return next_step
-    def go_right(next_step):
-        next_step = (next_step[0] + 1, next_step[1])  # право
-        return next_step
-    def go_left(next_step):
-        next_step = (next_step[0] - 1, next_step[1]) #лево
-        return next_step
-    def up_down_left_right(next_step):
-        if randint(0, 1) == 0: #право лево либо верх низ
-            if randint(0, 1) == 0: #право лево
-                next_step = go_right(next_step) #право
-            else:
-                next_step = go_left(next_step) #право лево
-        else:
-            if randint(0, 1) == 0: #верх низ
-                next_step = go_down(next_step)
-            else:
-                next_step = go_up(next_step) #верх
-        return next_step
-    while next_step != end_point:
-        if next_step in path:
-            next_step = (0, 0)
-            path = []
-        else:
-            if 0 < next_step[0] < end_point[0] and 0 < next_step[1] < end_point[1]: #тело матрицы
-                path.append(next_step)
-                next_step = up_down_left_right(next_step)
-            elif next_step[0] == 0 and next_step[1] == 0:  # верхний левый угол
-                path.append(next_step)
-                if randint(0, 1) == 1:
-                    next_step = go_down(next_step)
-                else:
-                    next_step = go_right(next_step)
-            elif next_step[0] == end_point[0] and next_step[1] == 0:  # верхний правый угол
-                path.append(next_step)
-                if randint(0, 1) == 1:
-                    next_step = go_down(next_step)
-                else:
-                    next_step = go_left(next_step)
-            elif next_step[0] == 0 and next_step[1] == end_point[1]:  # нижний левый угол
-                path.append(next_step)
-                if randint(0, 1) == 1:
-                    next_step = go_up(next_step)
-                else:
-                    next_step = go_right(next_step)
-            elif 0 < next_step[0] < end_point[0] and next_step[1] == 0:  # верхняя граница без углов
-                path.append(next_step)
-                a = randint(0, 2)
-                if a == 0:
-                    next_step = go_left(next_step)
-                elif a == 1:
-                    next_step = go_right(next_step)
-                else:
-                    next_step = go_down(next_step)
-            elif 0 < next_step[0] < end_point[0] and next_step[1] == end_point[1]:  # нижняя граница без углов
-                path.append(next_step)
-                a = randint(0, 2)
-                if a == 0:
-                    next_step = go_left(next_step)
-                elif a == 1:
-                    next_step = go_right(next_step)
-                else:
-                    next_step = go_up(next_step)
-            elif next_step[0] == end_point[0] and 0 < next_step[1] < end_point[1]:  # правая граница без углов
-                path.append(next_step)
-                a = randint(0, 2)
-                if a == 0:
-                    next_step = go_left(next_step)
-                elif a == 1:
-                    next_step = go_down(next_step)
-                else:
-                    next_step = go_up(next_step)
-            elif next_step[0] == 0 and 0 < next_step[1] < end_point[1]:  # левая граница без углов
-                path.append(next_step)
-                a = randint(0, 2)
-                if a == 0:
-                    next_step = go_right(next_step)
-                elif a == 1:
-                    next_step = go_down(next_step)
-                else:
-                    next_step = go_up(next_step)
-    path.append(next_step)
-    return path
+def map_generator2(lvlmap):
+    max_x, max_y = len(lvlmap) - 1, len(lvlmap[0]) - 1
+    digger = [0, 0]
+    path1 = [(0, 0)]
+    map_ave = len(lvlmap) + len(lvlmap[0]) / 2
+    b_count = 0
+    a_count = 0
+    while digger != [max_x, max_y]:
+        for i, j in enumerate(lvlmap):
+            for z, l in enumerate(j):
+                if [i, z] == digger:
+                    # lvlmap[i][z].wall = 1
+                    lvlmap[i][z].digger_was_here = True
+                    if digger[0] == 0 and digger[1] == 0: #диггер в верхнем левом углу
+                        a = randint(0, 1)
+                        if a == 0: #рандом + если не был справа, идем  and lvlmap[i + 1][z].digger_was_here == False
+                            digger[0] += 1 #вправо
+                            path1.append((digger[0], digger[1]))
+                            # print(path1)
+                            # print(digger)
+                            b_count = 0
+                            break
+                        else: #рандом + если не был снизу, идем  lvlmap[i][z + 1].digger_was_here == False
+                            digger[1] += 1 #вниз
+                            path1.append((digger[0], digger[1]))
+                            # print(path1)
+                            # print(digger)
+                            b_count = 0
+                            break
+                    elif digger[0] == 0 and digger[1] == max_y: #диггер в нижнем левом углу
+                        a = randint(0,1)
+                        if a == 0 and lvlmap[i + 1][z].digger_was_here == False:  # рандом + если не был справа, идем
+                            digger[0] += 1  # вправо
+                            path1.append((digger[0], digger[1]))
+                            # print(path1)
+                            # print(digger)
+                            b_count = 0
+                            break
+                        elif lvlmap[i][z - 1].digger_was_here == False:  # рандом + если не был вверху, идем
+                            digger[1] -= 1  # вверх
+                            path1.append((digger[0], digger[1]))
+                            # print(path1)
+                            # print(digger)
+                            b_count = 0
+                            break
+                        else:
+                            # print("Не смог выйти из правниж")
+                            b_count += 1
+                            a_count += 1
+                            digger = list(path1[-b_count])
+                            # print(-b_count)
+                            break
+                    elif digger[0] == max_x and digger[1] == 0: #диггер в верхнем правом углу
+                        a = randint(0, 1)
+                        if a == 0 and lvlmap[i - 1][z].digger_was_here == False:  # рандом + если не был слева, идем
+                            digger[0] -= 1  # влево
+                            path1.append((digger[0], digger[1]))
+                            # print(path1)
+                            # print(digger)
+                            b_count = 0
+                            break
+                        elif lvlmap[i][z + 1].digger_was_here == False:  # рандом + если не был сверзу, идем
+                            digger[1] += 1  # вниз
+                            path1.append((digger[0], digger[1]))
+                            # print(path1)
+                            # print(digger)
+                            b_count = 0
+                            break
+                        else:
+                            # print("не смог выйти из правверх")
+                            b_count += 1
+                            a_count += 1
+                            digger = list(path1[-b_count])
+                            # print(-b_count)
+                            b_count = 0
+                            break
+                    elif digger[0] == 0 and 0 < digger[1] < max_y: #диггер слева
+                        a = randint(0, 2)
+                        if a == 0 and lvlmap[i + 1][z].digger_was_here == False:
+                            digger[0] += 1  # вправо
+                            path1.append((digger[0], digger[1]))
+                            # print(path1)
+                            # print(digger)
+                            b_count = 0
+                            break
+                        elif a == 1 and lvlmap[i][z - 1].digger_was_here == False:
+                            digger[1] -= 1  # вверх
+                            path1.append((digger[0], digger[1]))
+                            # print(path1)
+                            # print(digger)
+                            b_count = 0
+                            break
+                        elif a == 2 and lvlmap[i][z + 1].digger_was_here == False:  # рандом + если не был снизу, идем
+                            digger[1] += 1  # вниз
+                            path1.append((digger[0], digger[1]))
+                            # print(path1)
+                            # print(digger)
+                            b_count = 0
+                            break
+                        else:
+                            # print("Не смог выйти из лев")
+                            b_count += 1
+                            a_count += 1
+                            digger = list(path1[-b_count])
+                            # print(-b_count)
+                            break
+                    elif 0 < digger[0] < max_x and digger[1] == 0: #диггер сверху
+                        a = randint(0, 2)
+                        if a == 0 and lvlmap[i + 1][z].digger_was_here == False:
+                            digger[0] += 1  # вправо
+                            path1.append((digger[0], digger[1]))
+                            # print(path1)
+                            # print(digger)
+                            b_count = 0
+                            break
+                        elif a == 1 and lvlmap[i][z + 1].digger_was_here == False:  # рандом + если не был сверху, идем
+                            digger[1] += 1  # вниз
+                            path1.append((digger[0], digger[1]))
+                            # print(path1)
+                            # print(digger)
+                            b_count = 0
+                            break
+                        elif a == 2 and lvlmap[i - 1][z].digger_was_here == False:  # рандом + если не был снизу, идем
+                            digger[0] -= 1  # влево
+                            path1.append((digger[0], digger[1]))
+                            # print(path1)
+                            # print(digger)
+                            b_count = 0
+                            break
+                        else:
+                            # print("Не смог выйти из верх")
+                            b_count += 1
+                            a_count += 1
+                            digger = list(path1[-b_count])
+                            # print(-b_count)
+                            break
+                    elif 0 < digger[0] < max_x and digger[1] == max_y: #диггер снизу
+                        a = randint(0, 2)
+                        if a == 0 and lvlmap[i + 1][z].digger_was_here == False:
+                            digger[0] += 1  # вправо
+                            path1.append((digger[0], digger[1]))
+                            # print(path1)
+                            # print(digger)
+                            b_count = 0
+                            break
+                        elif a == 1 and lvlmap[i][z - 1].digger_was_here == False:
+                            digger[1] -= 1  # вверх
+                            path1.append((digger[0], digger[1]))
+                            # print(path1)
+                            # print(digger)
+                            b_count = 0
+                            break
+                        elif a == 2 and lvlmap[i - 1][z].digger_was_here == False:
+                            digger[0] -= 1  # влево
+                            path1.append((digger[0], digger[1]))
+                            # print(path1)
+                            # print(digger)
+                            b_count = 0
+                            break
+                        else:
+                            # print("Не смог выйти из низ")
+                            a_count += 1
+                            b_count += 1
+                            digger = list(path1[-b_count])
+                            # print(-b_count)
+                            break
+                    elif digger[0] == max_x and 0 < digger[1] < max_y: #диггер справа
+                        a = randint(0, 2)
+                        if a == 0 and lvlmap[i - 1][z].digger_was_here == False:
+                            digger[0] -= 1  # влево
+                            path1.append((digger[0], digger[1]))
+                            # print(digger)
+                            # print(path1)
+                            b_count = 0
+                            break
+                        elif a == 1 and lvlmap[i][z - 1].digger_was_here == False:
+                            digger[1] -= 1  # вверх
+                            path1.append((digger[0], digger[1]))
+                            # print(digger)
+                            # print(path1)
+                            b_count = 0
+                            break
+                        elif a == 2 and lvlmap[i][z + 1].digger_was_here == False:
+                            digger[1] += 1  # вниз
+                            path1.append((digger[0], digger[1]))
+                            # print(digger)
+                            # print(path1)
+                            b_count = 0
+                            break
+                        else:
+                            # print("Не смог выйти из прав")
+                            b_count += 1
+                            a_count += 1
+                            digger = list(path1[-b_count])
+                            # print(-b_count)
+                            break
+                    elif 0 < digger[0] < max_x and 0 < digger[1] < max_y: #диггер внутри
+                        a = randint(0, 1)
+                        if a == 0:
+                            a = randint(0, 1)
+                            if a == 0 and lvlmap[i - 1][z].digger_was_here == False:
+                                digger[0] -= 1  # влево
+                                path1.append((digger[0], digger[1]))
+                                # print(digger)
+                                # print(path1)
+                                b_count = 0
+                                break
+                            elif lvlmap[i][z - 1].digger_was_here == False:
+                                digger[1] -= 1  # вверх
+                                path1.append((digger[0], digger[1]))
+                                # print(digger)
+                                # print(path1)
+                                b_count = 0
+                                break
+                            else:
+                                # print("Не смог выйти из нутр")
+                                b_count += 1
+                                a_count += 1
+                                digger = list(path1[-b_count])
+                                # print(-b_count)
+                                break
+                        else:
+                            a = randint(0, 1)
+                            if a == 1 and lvlmap[i][z + 1].digger_was_here == False:  # рандом + если не был снизу, идем
+                                digger[1] += 1  # вниз
+                                path1.append((digger[0], digger[1]))
+                                # print(digger)
+                                # print(path1)
+                                b_count = 0
+                                break
+                            elif lvlmap[i + 1][z].digger_was_here == False:
+                                digger[0] += 1  # вправо
+                                path1.append((digger[0], digger[1]))
+                                # print(digger)
+                                # print(path1)
+                                b_count = 0
+                                break
+                            else:
+                                # print("Не смог выйти из нутр")
+                                b_count += 1
+                                a_count += 1
+                                digger = list(path1[-b_count])
+                                # print(-b_count, a_count)
+                                break
+        if a_count > 100:
+            break
+    p_prop = map_ave / len(path1)
+    if (max_x, max_y) in path1 and 0.3 < p_prop < 0.6:
+        print(f"Пропорции {p_prop}")
+        lvlmap[max_x][max_y].digger_was_here = True
+        return lvlmap, path1
+    else:
+        print(f"Повтор")
+        print(p_prop)
+        for i, j in enumerate(lvlmap):
+            for z, l in enumerate(j):
+                lvlmap[i][z].digger_was_here = False
+        return map_generator2(lvlmap)
+
+def map_generator3(lvlmap):
+    max_x, max_y = len(lvlmap) - 1, len(lvlmap[0]) - 1
+    digger = [0, 0]
+    path1 = [(0, 0)]
+    map_ave = (len(lvlmap) + len(lvlmap[0])) / 2
+    b_count = 0
+    a_count = 0
+    while digger != [max_x, max_y]:
+        for i, j in enumerate(lvlmap):
+            for z, l in enumerate(j):
+                if [i, z] == digger:
+                    # lvlmap[i][z].wall = 1
+                    lvlmap[i][z].digger_was_here = True
+                    if digger[0] == 0 and digger[1] == 0: #диггер в верхнем левом углу
+                        a = randint(0, 1)
+                        if a == 0: #рандом + если не был справа, идем  and lvlmap[i + 1][z].digger_was_here == False
+                            digger[0] += 1 #вправо
+                            path1.append((digger[0], digger[1]))
+                            # print(path1)
+                            # print(digger)
+                            b_count = 0
+                            break
+                        else: #рандом + если не был снизу, идем  lvlmap[i][z + 1].digger_was_here == False
+                            digger[1] += 1 #вниз
+                            path1.append((digger[0], digger[1]))
+                            # print(path1)
+                            # print(digger)
+                            b_count = 0
+                            break
+                    elif digger[0] == 0 and digger[1] == max_y: #диггер в нижнем левом углу
+                        a = randint(0,1)
+                        if a == 0 and lvlmap[i + 1][z].digger_was_here == False:  # рандом + если не был справа, идем
+                            digger[0] += 1  # вправо
+                            path1.append((digger[0], digger[1]))
+                            # print(path1)
+                            # print(digger)
+                            b_count = 0
+                            break
+                        elif lvlmap[i][z - 1].digger_was_here == False:  # рандом + если не был вверху, идем
+                            digger[1] -= 1  # вверх
+                            path1.append((digger[0], digger[1]))
+                            # print(path1)
+                            # print(digger)
+                            b_count = 0
+                            break
+                        else:
+                            # print("Не смог выйти из правниж")
+                            b_count += 1
+                            a_count += 1
+                            digger = list(path1[-b_count])
+                            # print(-b_count)
+                            break
+                    elif digger[0] == max_x and digger[1] == 0: #диггер в верхнем правом углу
+                        a = randint(0, 1)
+                        if a == 0 and lvlmap[i - 1][z].digger_was_here == False:  # рандом + если не был слева, идем
+                            digger[0] -= 1  # влево
+                            path1.append((digger[0], digger[1]))
+                            # print(path1)
+                            # print(digger)
+                            b_count = 0
+                            break
+                        elif lvlmap[i][z + 1].digger_was_here == False:  # рандом + если не был сверзу, идем
+                            digger[1] += 1  # вниз
+                            path1.append((digger[0], digger[1]))
+                            # print(path1)
+                            # print(digger)
+                            b_count = 0
+                            break
+                        else:
+                            # print("не смог выйти из правверх")
+                            b_count += 1
+                            a_count += 1
+                            digger = list(path1[-b_count])
+                            # print(-b_count)
+                            b_count = 0
+                            break
+                    elif digger[0] == 0 and 0 < digger[1] < max_y: #диггер слева
+                        a = randint(0, 1)
+                        if a == 0 and lvlmap[i + 1][z].digger_was_here == False:
+                            digger[0] += 1  # вправо
+                            path1.append((digger[0], digger[1]))
+                            # print(path1)
+                            # print(digger)
+                            b_count = 0
+                            break
+                        else:
+                            a = randint(0, 1)
+                            if a == 0 and lvlmap[i][z - 1].digger_was_here == False:
+                                digger[1] -= 1  # вверх
+                                path1.append((digger[0], digger[1]))
+                                # print(path1)
+                                # print(digger)
+                                b_count = 0
+                                break
+                            elif lvlmap[i][z + 1].digger_was_here == False:  # рандом + если не был снизу, идем
+                                digger[1] += 1  # вниз
+                                path1.append((digger[0], digger[1]))
+                                # print(path1)
+                                # print(digger)
+                                b_count = 0
+                                break
+                            else:
+                                # print("Не смог выйти из лев")
+                                b_count += 1
+                                a_count += 1
+                                digger = list(path1[-b_count])
+                                # print(-b_count)
+                                break
+                    elif 0 < digger[0] < max_x and digger[1] == 0: #диггер сверху
+                        a = randint(0, 1)
+                        if a == 0 and lvlmap[i + 1][z].digger_was_here == False:
+                            digger[0] += 1  # вправо
+                            path1.append((digger[0], digger[1]))
+                            # print(path1)
+                            # print(digger)
+                            b_count = 0
+                            break
+                        else:
+                            a = randint(0, 1)
+                            if a == 0 and lvlmap[i][z + 1].digger_was_here == False:  # рандом + если не был сверху, идем
+                                digger[1] += 1  # вниз
+                                path1.append((digger[0], digger[1]))
+                                # print(path1)
+                                # print(digger)
+                                b_count = 0
+                                break
+                            elif lvlmap[i - 1][z].digger_was_here == False:  # рандом + если не был снизу, идем
+                                digger[0] -= 1  # влево
+                                path1.append((digger[0], digger[1]))
+                                # print(path1)
+                                # print(digger)
+                                b_count = 0
+                                break
+                            else:
+                                # print("Не смог выйти из верх")
+                                b_count += 1
+                                a_count += 1
+                                digger = list(path1[-b_count])
+                                # print(-b_count)
+                                break
+                    elif 0 < digger[0] < max_x and digger[1] == max_y: #диггер снизу
+                        a = randint(0, 1)
+                        if a == 0 and lvlmap[i + 1][z].digger_was_here == False:
+                            digger[0] += 1  # вправо
+                            path1.append((digger[0], digger[1]))
+                            # print(path1)
+                            # print(digger)
+                            b_count = 0
+                            break
+                        else:
+                            a = randint(0,1)
+                            if a == 0 and lvlmap[i][z - 1].digger_was_here == False:
+                                digger[1] -= 1  # вверх
+                                path1.append((digger[0], digger[1]))
+                                # print(path1)
+                                # print(digger)
+                                b_count = 0
+                                break
+                            elif lvlmap[i - 1][z].digger_was_here == False:
+                                digger[0] -= 1  # влево
+                                path1.append((digger[0], digger[1]))
+                                # print(path1)
+                                # print(digger)
+                                b_count = 0
+                                break
+                            else:
+                                # print("Не смог выйти из низ")
+                                a_count += 1
+                                b_count += 1
+                                digger = list(path1[-b_count])
+                                # print(-b_count)
+                                break
+                    elif digger[0] == max_x and 0 < digger[1] < max_y: #диггер справа
+                        a = randint(0, 1)
+                        if a == 0 and lvlmap[i - 1][z].digger_was_here == False:
+                            digger[0] -= 1  # влево
+                            path1.append((digger[0], digger[1]))
+                            # print(digger)
+                            # print(path1)
+                            b_count = 0
+                            break
+                        else:
+                            a = randint(0, 1)
+                            if a == 0 and lvlmap[i][z - 1].digger_was_here == False:
+                                digger[1] -= 1  # вверх
+                                path1.append((digger[0], digger[1]))
+                                # print(digger)
+                                # print(path1)
+                                b_count = 0
+                                break
+                            elif lvlmap[i][z + 1].digger_was_here == False:
+                                digger[1] += 1  # вниз
+                                path1.append((digger[0], digger[1]))
+                                # print(digger)
+                                # print(path1)
+                                b_count = 0
+                                break
+                            else:
+                                # print("Не смог выйти из прав")
+                                b_count += 1
+                                a_count += 1
+                                digger = list(path1[-b_count])
+                                # print(-b_count)
+                                break
+                    elif 0 < digger[0] < max_x and 0 < digger[1] < max_y: #диггер внутри
+                        a = randint(0, 1)
+                        if a == 0:
+                            a = randint(0, 1)
+                            if a == 0 and lvlmap[i - 1][z].digger_was_here == False:
+                                digger[0] -= 1  # влево
+                                path1.append((digger[0], digger[1]))
+                                # print(digger)
+                                # print(path1)
+                                b_count = 0
+                                break
+                            elif lvlmap[i][z - 1].digger_was_here == False:
+                                digger[1] -= 1  # вверх
+                                path1.append((digger[0], digger[1]))
+                                # print(digger)
+                                # print(path1)
+                                b_count = 0
+                                break
+                            else:
+                                # print("Не смог выйти из нутр")
+                                b_count += 1
+                                a_count += 1
+                                digger = list(path1[-b_count])
+                                # print(-b_count)
+                                break
+                        else:
+                            a = randint(0, 1)
+                            if a == 1 and lvlmap[i][z + 1].digger_was_here == False:  # рандом + если не был снизу, идем
+                                digger[1] += 1  # вниз
+                                path1.append((digger[0], digger[1]))
+                                # print(digger)
+                                # print(path1)
+                                b_count = 0
+                                break
+                            elif lvlmap[i + 1][z].digger_was_here == False:
+                                digger[0] += 1  # вправо
+                                path1.append((digger[0], digger[1]))
+                                # print(digger)
+                                # print(path1)
+                                b_count = 0
+                                break
+                            else:
+                                # print("Не смог выйти из нутр")
+                                b_count += 1
+                                a_count += 1
+                                digger = list(path1[-b_count])
+                                # print(-b_count, a_count)
+                                break
+        if a_count > 100:
+            break
+    p_prop = map_ave / len(path1)
+    if (max_x, max_y) in path1 and 0.1 < p_prop < 0.13:
+        print(f"Пропорции {p_prop}")
+        lvlmap[max_x][max_y].digger_was_here = True
+        return lvlmap, path1
+    else:
+        print(f"Не те пропорции, повтор")
+        for i, j in enumerate(lvlmap):
+            for z, l in enumerate(j):
+                lvlmap[i][z].digger_was_here = False
+        return map_generator3(lvlmap)
+
+def add_chest_to_map(lvlmap, path):
+    """Функция добавляет в произвольные тайлы карты сундуки, если на выходе сундука нет, еще раз вызывает себя"""
+    def check_for_no_chest(lvlmap):
+        """Проверочная функция, пробегает по карте для того, что бы удостовериться, что сундук добавлен"""
+        chest_flag = False
+        for i, j in enumerate(lvlmap):
+            for z, l in enumerate(j):
+                if lvlmap[i][z].situation == "chest":
+                    chest_flag = True
+                    return chest_flag
+    chests_x_y = []
+    for i, j in enumerate(lvlmap):
+        for z, l in enumerate(j):
+            if lvlmap[i][z].digger_was_here == True and (i, z) != (0, 0):
+                a = randint(1, len(path))
+                chest_chance = list(range(round(len(path) / 100)))
+                if a in chest_chance:
+                    lvlmap[i][z].situation = "chest"
+                    lvlmap[i][z].wall = "ˍ⮹ˍ"
+                    chests_x_y.append((i, z))
+    if check_for_no_chest(lvlmap) == True:
+        return chests_x_y
+    else:
+        print("Нет сундука, повторяем")
+        return add_chest_to_map(lvlmap, path)
+def add_random_to_map(lvlmap, path, chests_x_y):
+    """Функция добавляет в произвольные тайлы карты свитки и зелья"""
+    random_s_x_y = []
+    for i, j in enumerate(lvlmap):
+        for z, l in enumerate(j):
+            if lvlmap[i][z].digger_was_here == True and (i, z) != (0, 0) and (i, z) not in chests_x_y:
+                a = randint(1, len(path))
+                random_stuff_chance = list(range(round(len(path)/ 10)))
+                if a in random_stuff_chance:
+                    lvlmap[i][z].situation = "random"
+                    lvlmap[i][z].wall = "ˍ?ˍ"
+                    random_s_x_y.append((i, z))
+    return random_s_x_y
+
 
 
 

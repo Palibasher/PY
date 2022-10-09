@@ -1,4 +1,4 @@
-from map import *
+from map import matrix_make_tiles, map_generator3, map_generator2, add_chest_to_map, add_random_to_map
 from random import randint
 from classes_g import *
 if __name__ == "__main__":
@@ -6,6 +6,16 @@ if __name__ == "__main__":
     width = 25
     level_map = matrix_make_tiles(height,width)
     player = Player("Гарри", 10, 10, 10, raw_hp=30, pos_xx = width, pos_yy = height)
+
+
+    level_map, path = map_generator3(level_map) # генерация карты из пустого канваса объектов класса тайл
+    chest_positions = add_chest_to_map(level_map, path) # генерация сундуков в тайлах, которые соотвествуют пустому проходу
+    random_stuff_position = add_random_to_map(level_map, path, chest_positions)
+    print(chest_positions)
+    print(random_stuff_position)
+    player_move(player,level_map, chest_positions, random_stuff_position)
+
+
     # chest = Chest(player)
     # chest.open_and_take()
     # player.show_chr()
@@ -17,27 +27,4 @@ if __name__ == "__main__":
     # path2 = make_path_in_out(level_map)
     # path.extend(path2)
     # print(path)
-
-    level_map, path = map_generator3(level_map)
-    print(f"результат {path}")
-    # matrix_print(level_map)
-    for i, j in enumerate(level_map):
-        for z, l in enumerate(j):
-            if level_map[i][z].digger_was_here == True:
-                level_map[i][z].wall = "ˍ ˍ"
-            else:
-                level_map[i][z].wall = "▓▓▓"
-
-    # for i, j in enumerate(level_map):
-    #     for z, l in enumerate(j):
-    #         print(level_map[i][z], end="")
-    #     print()
-    # for i, j in enumerate(level_map):
-    #     for z, l in enumerate(j):
-    #         print(level_map[i][z].digger_was_here, end="")
-    #     print()
-    player_move(player,level_map)
-
-
-
 
