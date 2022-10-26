@@ -35,6 +35,7 @@ def map_generator2(lvlmap):
     map_ave = len(lvlmap) + len(lvlmap[0]) / 2
     b_count = 0
     a_count = 0
+    lvlmap[len(lvlmap)][len(lvlmap[0])].situation = "door"
     while digger != [max_x, max_y]:
         for i, j in enumerate(lvlmap):
             for z, l in enumerate(j):
@@ -294,6 +295,7 @@ def map_generator3(lvlmap):
     map_ave = (len(lvlmap) + len(lvlmap[0])) / 2
     b_count = 0
     a_count = 0
+    lvlmap[max_x][max_y].situation = "door"
     while digger != [max_x, max_y]:
         for i, j in enumerate(lvlmap):
             for z, l in enumerate(j):
@@ -547,7 +549,7 @@ def map_generator3(lvlmap):
         lvlmap[max_x][max_y].digger_was_here = True
         return lvlmap, path1
     else:
-        print(f"Не те пропорции, повтор")
+        # print(f"Не те пропорции, повтор")
         for i, j in enumerate(lvlmap):
             for z, l in enumerate(j):
                 lvlmap[i][z].digger_was_here = False
@@ -566,7 +568,7 @@ def add_chest_to_map(lvlmap, path):
     chests_x_y = []
     for i, j in enumerate(lvlmap):
         for z, l in enumerate(j):
-            if lvlmap[i][z].digger_was_here == True and (i, z) != (0, 0):
+            if lvlmap[i][z].digger_was_here == True and (i, z) != (0, 0) and (i, z) != (len(lvlmap) - 1, len(lvlmap[0]) - 1):
                 a = randint(1, len(path))
                 chest_chance = list(range(round(len(path) / 100)))
                 if a in chest_chance:
@@ -583,9 +585,9 @@ def add_random_to_map(lvlmap, path, chests_x_y):
     random_s_x_y = []
     for i, j in enumerate(lvlmap):
         for z, l in enumerate(j):
-            if lvlmap[i][z].digger_was_here == True and (i, z) != (0, 0) and (i, z) not in chests_x_y:
+            if lvlmap[i][z].digger_was_here == True and (i, z) != (0, 0) and (i, z) not in chests_x_y and (i, z) != (len(lvlmap) - 1, len(lvlmap[0]) - 1):
                 a = randint(1, len(path))
-                random_stuff_chance = list(range(round(len(path)/ 10)))
+                random_stuff_chance = list(range(round(len(path)/ 10))) #добавляет случайные события
                 if a in random_stuff_chance:
                     lvlmap[i][z].situation = "random"
                     lvlmap[i][z].wall = "ˍ?ˍ"

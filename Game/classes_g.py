@@ -130,7 +130,7 @@ class Player:
         self.pos_yy = pos_yy - 1
         self.pos_xx = pos_xx - 1
         self.move_message = None
-        self.next_lvl_key = 0
+        self.next_lvl_key = False #ключ перехода на след.уровень, либо выпадает из врага, либо из подозрительного места
 
     #Блок функций для пересчета ключевых характеристик
     def health_bonus(self):
@@ -153,7 +153,7 @@ class Player:
         return self.output_dmg() * 2
     def defence(self):
         return self.armor_pt + self.armour_bonus()
-    def make_move(self,lvlmap):
+    def make_move(self, lvlmap, gui_window):
         """Функция перемещения по карте, учитывает периметр и проверяя наличие стены, выдает соотвествующую инфу"""
         if self.move_message != None:
             print(self.move_message)
@@ -168,9 +168,11 @@ class Player:
             if where_to_go == 1 and option_r.digger_was_here == True: #проверяем, можно ли пойти вправо
                 self.pos_x += 1
                 self.move_message = None
+                return where_to_go #############
             elif where_to_go == 2 and option_d.digger_was_here == True: #проверяем, можно ли пойти вниз
                 self.pos_y += 1
                 self.move_message = None
+                return where_to_go #############
             else:
                 self.move_message = "Стена не дает пройти!"
         elif self.pos_x == self.pos_xx and self.pos_y == self.pos_yy: #нижний правый угол
@@ -180,9 +182,11 @@ class Player:
             if where_to_go == 2 and option_u.digger_was_here == True:
                 self.pos_y -= 1  # Запад
                 self.move_message = None
+                return where_to_go ##########
             elif where_to_go == 1 and option_l.digger_was_here == True:
                 self.pos_x -= 1  # Север
                 self.move_message = None
+                return where_to_go ###########
             else:
                 self.move_message = "Стена не дает пройти!"
         elif self.pos_x == 0 and self.pos_y == self.pos_yy: #нижний левый угол
@@ -309,6 +313,7 @@ class Player:
     def get_devparam(self):
         print(f"Ср.урон - {self.output_dmg()},Коэф.урона - {self.dmg_coefficient()}, урон текущег оружия - {self.weapon_pt}, защита - {self.defence()}\n"
               f"амулет здоровье - {self.health_bonus()}, амулет броня - {self.armour_bonus()}, амулет повржд - {self.dmg_bonus()}, am - {self.amulet}\n"
+              f"Ключ: {self.next_lvl_key}"
               f"x - {self.light_hit()}, y - {self.medium_hit()}, z - {self.mega_hit()} {self.amulet_pt}")
     def inventar_use(self):
         """Функция позволяет использовать предмет из инвентаря"""
@@ -382,38 +387,40 @@ class Player:
             lvlmap[self.pos_y][self.pos_x].was_here = True
         elif (self.pos_y, self.pos_x) in r_stuff:
             a = randint(0,5)
-            if a == 0:
+            if a == 0  and len(r_stuff) > 1:
                 a = randint(0, 1)
                 if a == 1:
                     self.add_scroll()
                     r_stuff.remove((self.pos_y, self.pos_x))
                 else:
                     print("Вы осмотрели небычное место, но заметили, что необычным его делает всего лишь\nпричудливый узор трещин на каменной кладке")
-            elif a == 1:
+            elif a == 1  and len(r_stuff) > 1:
                 if a == 1:
                     self.add_potion()
                     r_stuff.remove((self.pos_y, self.pos_x))
                 else:
                     print("Вы осмотрели небычное место, но заметили, что необычным его делает\nвсего лишь странного цвета разросшийся мох на стене")
-            elif a == 2:
+            elif a == 2 and len(r_stuff) > 1:
                 print("Вы приблизились к подозрительному месту, что бы осмотреть его, но\nВнезапно, из-за ближайшей колонны выпрыгнул гоблин!!")
                 goblin_name = "goblin" + str(self.pos_y) + str(self.pos_x)
-                goblin_name = Goblin()
-                result = fight_with_enemy(self, goblin_name)
+                goblin_name = Goblin() #присвоение врагу имени и класса гоблина
+                result = fight_with_enemy(self, goblin_name) #возвращаем результат боя  дальше это уйдет в Player_move и черек
                 r_stuff.remove((self.pos_y, self.pos_x))
                 return result
-            elif a == 3:
-                if self.next_lvl_key == 0:
-                    self.next_lvl_key = 1
-                    print("Вы нашли ключ!")
-                else:
-                    print("Вы изучили необычное место, при внимательном изучении оно оказалось обычным.")
-            elif a > 3:
+            elif len(r_stuff) < 2 and self.next_lvl_key == False:
+                self.next_lvl_key = True
+                print("Вы нашли ключ!")
+                # print("Вы изучили необычное место, при внимательном изучении оно оказалось обычным.")
+            elif a >= 3:
                 print("Вы внимательно осмотрели подозрительное место, но это всего лишь была игра света и тени.")
+        elif (self.pos_y, self.pos_x) == (self.pos_yy, self.pos_xx):
+            if self.next_lvl_key == False:
+                print("Вы обнаружили дверь, на ней висит огромный замок, а ключа у вас нет.")
+            else:
+                print("Yes")
 
 
-
-def player_move(player, lvlmap, chest_positions, random_stuff_position):
+def player_move(player, lvlmap, chest_positions, random_stuff_position, gui_window):
     move_flag = 1
     def state_refresher(player, lvlmap): #перерисовываем карту, где игрок там
         for i, j in enumerate(lvlmap):
@@ -426,12 +433,14 @@ def player_move(player, lvlmap, chest_positions, random_stuff_position):
                     lvlmap[i][z].state = 1
                     if lvlmap[i][z].digger_was_here == False:
                         lvlmap[i][z].wall = "▓▓▓"
-                    elif (lvlmap[i][z].digger_was_here == True and lvlmap[i][z].situation == None) or lvlmap[i][z].was_here == True:
+                    elif (lvlmap[i][z].digger_was_here == True and lvlmap[i][z].situation == None) or (lvlmap[i][z].was_here == True and lvlmap[i][z].situation != "door"):
                         lvlmap[i][z].wall = "ˍ ˍ"
                     elif lvlmap[i][z].digger_was_here == True and lvlmap[i][z].situation == "chest":
                         lvlmap[i][z].wall = "ˍ⮹ˍ"
                     elif lvlmap[i][z].digger_was_here == True and lvlmap[i][z].situation == "random":
                         lvlmap[i][z].wall = "ˍ?ˍ"
+                    elif lvlmap[i][z].digger_was_here == True and lvlmap[i][z].situation == "door":
+                        lvlmap[i][z].wall = "ˍ◫ˍ"
 
     while move_flag == 1:
         state_refresher(player, lvlmap) # записываем карту в соотвествии с нашими мувами
@@ -445,7 +454,7 @@ def player_move(player, lvlmap, chest_positions, random_stuff_position):
             player.raw_hp = state_of_player
         elif state_of_player == "friendship":
             pass
-        player.make_move(lvlmap) #обращаемся к методу выбора следующего движения
+        player.make_move(lvlmap, gui_window) #обращаемся к методу выбора следующего движения
 
 def retry_for_gen(map_generator2):
     counter_repeat = (i + i for i in range(1, 100))
@@ -589,7 +598,7 @@ def fight_with_enemy(player, enemy):
     made_attack = 0
     player_hp = player.current_hp()
     player_defence = player.defence()
-    def inner_player_hp_checker():
+    def inner_player_hp_checker(): #функция проверяет насколько мы живы
         if 0 < player_hp < 10:
             print("Критический уровень здоровья!")
             return 1
@@ -598,7 +607,7 @@ def fight_with_enemy(player, enemy):
         else:
             print("Вы умерли, земля вам пухом...")
             return 0
-    def inner_enemy_hit():
+    def inner_enemy_hit(): #удар врага
         hit = enemy.new_hit()
         check_for_luck_enemy = randint(1, 100)
         if check_for_luck_enemy > 30 + player.agi: #шанс попасть
@@ -617,6 +626,13 @@ def fight_with_enemy(player, enemy):
             else:
                 print(f"{enemy.name} набросился, но вы ловко увернулись из-под удара!")
                 return 0
+    def key_checker(): #шанс выпадения ключа их мервого врага
+        if enemy.base_hp <= 0:
+            if player.next_lvl_key == False: # Проверка
+                a = randint(1, 3)
+                if a == 1:
+                    player.next_lvl_key = True
+                    print("Вы нашли ключ!!!")
     while enemy.base_hp > 0 and player_hp > 0:
         print(f"......................................................................................................\n"
               f"Остаток очков здоровья врага - {enemy.base_hp}")
@@ -638,16 +654,18 @@ def fight_with_enemy(player, enemy):
                         print(f"Вы почувствовали прилив ярости и нанесли сокрушительный удар {enemy.name} на {final_damage} урона, у него осталось {enemy.base_hp} жизни")
                         if enemy.base_hp <= 0:
                             print(f"Вы убили {enemy.name}")
+                            key_checker()
                             return player_hp
                         else:
                             player_hp = player_hp - inner_enemy_hit()
                             if inner_player_hp_checker() == 0:
-                                return 0
+                                return 0, False
                     else:
                         enemy.base_hp -= final_damage
                         print(f"Вы ударили {enemy.name} на {final_damage} урона, у него осталось {enemy.base_hp} жизни")
                         if enemy.base_hp <= 0:
                             print(f"Вы убили {enemy.name}")
+                            key_checker()
                             return player_hp
                         else:
                             player_hp = player_hp - inner_enemy_hit()
@@ -675,6 +693,7 @@ def fight_with_enemy(player, enemy):
                         print(f"Вы почувствовали прилив ярости и нанесли сокрушительный удар {enemy.name} на {final_damage} урона, у него осталось {enemy.base_hp} жизни")
                         if enemy.base_hp <= 0:
                             print(f"Вы убили {enemy.name}")
+                            key_checker()
                             return player_hp
                         else:
                             player_hp = player_hp - inner_enemy_hit()
@@ -685,6 +704,7 @@ def fight_with_enemy(player, enemy):
                         print(f"Вы ударили {enemy.name} на {final_damage} урона, у него осталось {enemy.base_hp} жизни")
                         if enemy.base_hp <= 0:
                             print(f"Вы убили {enemy.name}")
+                            key_checker()
                             return player_hp
                         else:
                             player_hp = player_hp - inner_enemy_hit()
@@ -714,6 +734,7 @@ def fight_with_enemy(player, enemy):
                             print(f"Вы почувствовали прилив ярости и нанесли сокрушительный удар {enemy.name} на {final_damage} урона, у него осталось {enemy.base_hp} жизни")
                             if enemy.base_hp <= 0:
                                 print(f"Вы убили {enemy.name}")
+                                key_checker()
                                 return player_hp
                             else:
                                 player_hp = player_hp - inner_enemy_hit()
@@ -724,6 +745,7 @@ def fight_with_enemy(player, enemy):
                             print(f"Вы нанесли мощный удар {enemy.name} на {final_damage} урона, у него осталось {enemy.base_hp} жизни")
                             if enemy.base_hp <= 0:
                                 print(f"Вы убили {enemy.name}")
+                                key_checker()
                                 return player_hp
                             else:
                                 player_hp = player_hp - inner_enemy_hit()
@@ -731,12 +753,14 @@ def fight_with_enemy(player, enemy):
                                     return 0
                         if enemy.base_hp <= 0:
                             print(f"Вы убили {enemy.name}")
+                            key_checker()
                             return player_hp
                     elif what_hit == 3: # выполняем сильный удар
                         enemy.base_hp -= final_damage
                         print(f"Вы ударили {enemy.name} на {final_damage} урона, у него осталось {enemy.base_hp} жизни")
                         if enemy.base_hp <= 0:
                             print(f"Вы убили {enemy.name}")
+                            key_checker()
                             return player_hp
                         else:
                             player_hp = player_hp - inner_enemy_hit()
@@ -771,6 +795,7 @@ def fight_with_enemy(player, enemy):
                     enemy.base_hp -= round(10 * (player.int / 10))
                     if enemy.base_hp <= 0:
                         print(f"Вы убили {enemy.name}")
+                        key_checker()
                         return player_hp
                     else:
                         print(f"{enemy.name} корчится от боли, ошарашенно вращая глазами\n")
