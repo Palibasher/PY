@@ -1,4 +1,4 @@
-﻿## ** Кейс "Баланс учеников в онлайн-школе английского языка"
+## ** Кейс "Баланс учеников в онлайн-школе английского языка"
 
 
 **Описание кейса.**
@@ -63,7 +63,9 @@
     - **id_teaching_level** - уникальный идентификатор уровня языка у преподавателя
     - **language_group** - основной язык преподавателя
 
-
+code
+```
+{
     with first_payments as (select user_id
             , min (transaction_datetime::date) as first_transaction_date
         from skyeng_db.payments
@@ -134,4 +136,5 @@
     from balances
     group by 1
     order by 1
-
+}
+```
