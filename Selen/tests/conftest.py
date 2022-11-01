@@ -21,7 +21,6 @@ def get_webdriver(get_chrome_options):
 @pytest.fixture(scope="function", autouse=True)
 def setup(request, get_webdriver):
     driver = get_webdriver
-    # bace_url = "https://coinmarketcap.com/"
     bace_url = "http://petfriends.skillfactory.ru/login"
     if request.cls is not None:
         request.cls.driver = driver

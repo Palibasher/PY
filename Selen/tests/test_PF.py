@@ -22,7 +22,7 @@ class Test_Pet_bros:
         assert test_driver.find_element(By.TAG_NAME, "h1").text == "PetFriends"
 
     def test_sf_25_3(self, setup):
-        """ Тесть проверяет, что:
+        """ Тест проверяет, что:
             1. Присутствуют все питомцы.
             2. Хотя бы у половины питомцев есть фото.
             3. У всех питомцев есть имя, возраст и порода.
