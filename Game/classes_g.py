@@ -153,7 +153,7 @@ class Player:
         return self.output_dmg() * 2
     def defence(self):
         return self.armor_pt + self.armour_bonus()
-    def make_move(self, lvlmap, gui_window):
+    def make_move(self, lvlmap, gui_window=None):
         """Функция перемещения по карте, учитывает периметр и проверяя наличие стены, выдает соотвествующую инфу"""
         if self.move_message != None:
             print(self.move_message)
@@ -420,7 +420,7 @@ class Player:
                 print("Yes")
 
 
-def player_move(player, lvlmap, chest_positions, random_stuff_position, gui_window):
+def player_move(player, lvlmap, chest_positions, random_stuff_position, gui_window=None):
     move_flag = 1
     def state_refresher(player, lvlmap): #перерисовываем карту, где игрок там
         for i, j in enumerate(lvlmap):
@@ -454,7 +454,7 @@ def player_move(player, lvlmap, chest_positions, random_stuff_position, gui_wind
             player.raw_hp = state_of_player
         elif state_of_player == "friendship":
             pass
-        player.make_move(lvlmap, gui_window) #обращаемся к методу выбора следующего движения
+        player.make_move(lvlmap, gui_window=None) #обращаемся к методу выбора следующего движения
 
 def retry_for_gen(map_generator2):
     counter_repeat = (i + i for i in range(1, 100))
